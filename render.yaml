@@ -1,0 +1,48 @@
+# Render Blueprint: one Docker Background Worker (IB Gateway + IBC + service) and a
+# Postgres instance, both in Virginia (US East). Secrets are entered in the dashboard
+# (sync: false); scripts/setup-wizard.sh collects them into .env for pasting.
+#
+# Deploy by hand, outside market hours: every deploy restarts the gateway and may need an
+# IB Key approval in IBKR Mobile.
+services:
+  - type: worker
+    name: ibkr-exec
+    runtime: docker
+    region: virginia
+    plan: standard            # 2 GB; the gateway is a Java process
+    dockerfilePath: ./deploy/Dockerfile
+    dockerContext: .
+    autoDeploy: false
+    envVars:
+      - key: TRADING_MODE
+        value: paper
+      - key: IB_PORT
+        value: "4002"
+      - key: BROKER
+        value: ib
+      - key: CONFIG_PATH
+        value: /app/config.yaml
+      - key: LOG_FORMAT
+        value: json
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ibkr-exec-db
+          property: connectionString
+      - key: TWS_USERID
+        sync: false
+      - key: TWS_PASSWORD
+        sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
+      - key: HMAC_BOT_SECRET
+        sync: false
+      - key: HMAC_ADMIN_SECRET
+        sync: false
+      # Never add CONFIRM_LIVE here. Live is a deliberate, manual change.
+
+databases:
+  - name: ibkr-exec-db
+    region: virginia
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+    ipAllowList: []           # private network only

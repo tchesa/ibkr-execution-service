@@ -1,0 +1,19 @@
+mode: paper            # paper | live; must match the gateway's account type or startup fails
+ib: {host: "${IB_HOST:-127.0.0.1}", port: ${IB_PORT:-4002}, client_id: 17}
+risk:
+  max_loss_per_trade_usd: 50
+  max_daily_loss_usd: 150
+  max_order_usd: 4000
+  max_position_pct: 75
+  cash_buffer_pct: 10      # of IBKR-reported AvailableFunds
+  max_trades_per_day: 3
+  max_open_positions: 2
+  min_reward_risk: 1.0
+  entry_window: ["09:45", "15:30"]
+  flat_by: "15:55"
+  price_tolerance_pct: 1.0
+  entry_timeout_min: 5
+  pdt_guard: true          # max 3 day trades per 5 business days under $25k equity
+symbols: {allow: ["*"], deny: []}   # US stocks/ETFs only; options never
+alerts:
+  slack_webhook_url: ${SLACK_WEBHOOK_URL}   # secret, from env
